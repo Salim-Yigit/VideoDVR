@@ -1,7 +1,9 @@
-﻿using System;
+﻿using MongoDB.Bson;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Management;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -79,7 +81,13 @@ namespace VideoToJson
             }
 
         }
-
+        public void WritePathsToTxt(string path)
+        {
+            using (StreamWriter sw = new StreamWriter("C:\\Users\\yigit\\OneDrive\\Masaüstü\\jpeg_paths.txt", true))
+            {
+                sw.WriteLine(path);
+            }
+        }
         private void Form1_Load(object sender, EventArgs e)
         {
             Thread th = new Thread(Start);
@@ -104,7 +112,7 @@ namespace VideoToJson
 
                 process.StartInfo.FileName = "ffmpeg";
 
-                process.StartInfo.Arguments = $"-i {rtspUrl} -vf fps=15 {outputDirectory}\\frame_%04d.jpg";
+                process.StartInfo.Arguments = $"-i {rtspUrl} -vf fps=15 {outputDirectory}\\frame_%d.jpg";
 
                 process.StartInfo.UseShellExecute = false;
 
@@ -112,27 +120,32 @@ namespace VideoToJson
 
                 process.StartInfo.CreateNoWindow = true;
 
-                // Start the process
-
-
+               
                 process.Start();
 
-                List<string> paths = yollariDosyayaYaz();
-                SomeMethod(paths[0]);
-
-                //process.BeginOutputReadLine(); 
+                for (int i=0;i <= process.StartInfo.Arguments.Length;i++) 
+                {
+                    string fileName = $"frame_{i}.jpg";
+                    string filePath = Path.Combine(outputDirectory, fileName);
+                    WritePathsToTxt(filePath);
+                }
+                
 
 
                 isProcessing = true;
+                
 
                 while (isProcessing)
                 {
                     byte[] frameData = DequeueFrame();
-                   
+
+
                     //StreamWriter sw = new StreamWriter("C:\\Users\\yigit\\OneDrive\\Masaüstü\\jpeg_paths.txt", true, Encoding.UTF8);
                     
+                    //SomeMethod(filePath);
                     watch.Start();
-                    JpegToJson.ImagetoJson();
+                    Thread.Sleep(1000);
+                    JpegToJson.ImagetoJson("C:\\Users\\yigit\\OneDrive\\Masaüstü\\jpeg_paths.txt");
                     DeleteOldestImageFromDisk(outputDirectory);
                     SomeMethod(watch.StopResult());
                     //JpegToJson.deleteImagesFromDatabase();
