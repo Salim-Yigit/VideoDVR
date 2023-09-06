@@ -13,7 +13,7 @@ namespace VideoToJson
 {
     class JpegToJson
     {
-        public static void ImagetoJson()
+        public static void ImagetoJson(string txtPath)
         {
             string imageFolderPath = "C:\\Users\\yigit\\OneDrive\\Masaüstü\\yeni"; // Klasör yolunu ayarlayın
 
@@ -28,7 +28,7 @@ namespace VideoToJson
             IMongoCollection<BsonDocument> collection = database.GetCollection<BsonDocument>(collectionName);
 
             // Klasördeki tüm JPEG dosyalarını al
-            string[] imageFiles = Directory.GetFiles(imageFolderPath, "*.jpg");
+            string[] imageFiles = File.ReadAllLines(txtPath);
 
             foreach (string imageFilePath in imageFiles)
             {
