@@ -102,7 +102,7 @@ namespace VideoToJson
 
                 process.StartInfo.FileName = "ffmpeg";
 
-                process.StartInfo.Arguments = $"-i {rtspUrl} -vf fps=15 {outputDirectory}\\frame_%d.jpg";
+                process.StartInfo.Arguments = $"-report -i {rtspUrl} -vf fps=15 {outputDirectory}\\frame_%d.jpg";
 
                 process.StartInfo.UseShellExecute = false;
 
@@ -112,8 +112,8 @@ namespace VideoToJson
 
                 process.Start();
 
-                byte[] frameData = DequeueFrame();
 
+                byte[] frameData = DequeueFrame();
 
                 isProcessing = true; 
                 while (isProcessing)
