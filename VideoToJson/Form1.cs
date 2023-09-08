@@ -112,7 +112,7 @@ namespace VideoToJson
 
                 process.StartInfo.FileName = "ffmpeg";
 
-                process.StartInfo.Arguments = $"-i {rtspUrl} -vf fps=15 {outputDirectory}\\frame_%d.jpg";
+                process.StartInfo.Arguments = $"-report -i {rtspUrl} -vf fps=15 {outputDirectory}\\frame_%d.jpg";
 
                 process.StartInfo.UseShellExecute = false;
 
@@ -123,14 +123,6 @@ namespace VideoToJson
                
                 process.Start();
 
-                for (int i=0;i <= process.StartInfo.Arguments.Length;i++) 
-                {
-                    string fileName = $"frame_{i}.jpg";
-                    string filePath = Path.Combine(outputDirectory, fileName);
-                    WritePathsToTxt(filePath);
-                }
-                
-
 
                 isProcessing = true;
                 
@@ -138,11 +130,6 @@ namespace VideoToJson
                 while (isProcessing)
                 {
                     byte[] frameData = DequeueFrame();
-
-
-                    //StreamWriter sw = new StreamWriter("C:\\Users\\yigit\\OneDrive\\Masaüstü\\jpeg_paths.txt", true, Encoding.UTF8);
-                    
-                    //SomeMethod(filePath);
                     watch.Start();
                     Thread.Sleep(1000);
                     JpegToJson.ImagetoJson("C:\\Users\\yigit\\OneDrive\\Masaüstü\\jpeg_paths.txt");
