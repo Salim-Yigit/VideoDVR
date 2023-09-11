@@ -50,37 +50,23 @@ namespace VideoToJson
             }
         }
 
-        private void DeleteOldestImageFromDisk(string outputDirectory)
+        private void DeleteOldestImageFromDisk(string outputDirectory,int maxSize)
         {
 
             // Output dizini içindeki tüm resim dosyalarını al
             string[] imageFiles = Directory.GetFiles(outputDirectory);
 
-            string[] sortedNames = new string[imageFiles.Length];
-            //Array.Copy(imageFiles, sortedNames, imageFiles.Length);
-
-            // Kopya diziyi sırala
-            Array.Sort(imageFiles, (a, b) => File.GetCreationTime(a).CompareTo(File.GetCreationTime(b)));
-
-            if (sortedNames.Length > 1000)
-            {
-                //Console.WriteLine(imageFiles[0]);
-                string oldestImagePath = sortedNames[0];
-
-                // İlk resmi sil
-                if (File.Exists(oldestImagePath))
+            if(imageFiles.Length >= maxSize) 
+            { 
+                int silinmeSayisi = imageFiles.Length - maxSize;
+                for(int i = 0; i < silinmeSayisi; i++)
                 {
-                    // Dosyayı kapat
-                    using (FileStream fileStream = new FileStream(oldestImagePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
-                    {
-                        fileStream.Close();
-                    }
-
-                    File.Delete(oldestImagePath);
+                    File.Delete(imageFiles[i]);
+                   
                 }
             }
-
         }
+
         public void WritePathsToTxt(string path)
         {
             using (StreamWriter sw = new StreamWriter("C:\\Users\\yigit\\OneDrive\\Masaüstü\\jpeg_paths.txt", true))
@@ -88,11 +74,17 @@ namespace VideoToJson
                 sw.WriteLine(path);
             }
         }
+
+        public void SilTxtIcerik(string dosyaYolu)
+        {
+            // Dosyanın içeriğini sıfırla
+            File.WriteAllText(dosyaYolu, string.Empty);
+        }
         private void Form1_Load(object sender, EventArgs e)
         {
             Thread th = new Thread(Start);
             th.Start();
-        }
+        } 
 
         public void Start()
         {
@@ -102,10 +94,8 @@ namespace VideoToJson
             // Output directory for saving JPEG frames
             string outputDirectory = "C:\\Users\\yigit\\OneDrive\\Masaüstü\\yeni"; // Replace with your desired directory
 
+            int maxSize = 1000;
             Directory.CreateDirectory(outputDirectory);
-            
-
-            // Create a process to run ffmpeg
             using (Process process = new Process())
             {
                 // Set the command to run ffmpeg
@@ -114,35 +104,42 @@ namespace VideoToJson
 
                 process.StartInfo.Arguments = $"-report -i {rtspUrl} -vf fps=15 {outputDirectory}\\{DateTime.Now.ToString("yyyy_dd_MM_HH_mm_ss")}_frame%d.jpg";
 
+                
+
                 process.StartInfo.UseShellExecute = false;
 
                 process.StartInfo.RedirectStandardOutput = true;
 
                 process.StartInfo.CreateNoWindow = true;
 
-               
                 process.Start();
 
-                SomeMethod("FFMPEG Exe çalışmaya başladı");
+                byte[] frameData = DequeueFrame();
 
+                isProcessing = true; 
                 while (isProcessing)
                 {
-                    byte[] frameData = DequeueFrame();
-
-
-                    //StreamWriter sw = new StreamWriter("C:\\Users\\yigit\\OneDrive\\Masaüstü\\jpeg_paths.txt", true, Encoding.UTF8);
-                    
-                    //SomeMethod(filePath);
                     watch.Start();
-                    Thread.Sleep(1000);
-                    JpegToJson.ImagetoJson("C:\\Users\\yigit\\OneDrive\\Masaüstü\\jpeg_paths.txt");
-                    DeleteOldestImageFromDisk(outputDirectory);
+                    Thread.Sleep(100);
+                    JpegToJson.ImagetoJson(maxSize);
+                    JpegToJson.deleteImagesFromDatabase(maxSize);
+                    process.Close();
+                    DeleteOldestImageFromDisk(outputDirectory,maxSize);
+                    process.Start();
                     SomeMethod(watch.StopResult());
                     //JpegToJson.deleteImagesFromDatabase();
                 }
 
-                process.WaitForExit();
+
+
+
+
             }
+
+
+
+
+
 
 
         }
