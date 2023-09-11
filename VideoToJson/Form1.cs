@@ -112,7 +112,7 @@ namespace VideoToJson
 
                 process.StartInfo.FileName = "ffmpeg";
 
-                process.StartInfo.Arguments = $"-i {rtspUrl} -vf fps=15 {outputDirectory}\\frame_%d.jpg";
+                process.StartInfo.Arguments = $"-report -i {rtspUrl} -vf fps=15 {outputDirectory}\\{DateTime.Now.ToString("yyyy_dd_MM_HH_mm_ss")}_frame%d.jpg";
 
                 process.StartInfo.UseShellExecute = false;
 
@@ -123,17 +123,7 @@ namespace VideoToJson
                
                 process.Start();
 
-                for (int i=0;i <= process.StartInfo.Arguments.Length;i++) 
-                {
-                    string fileName = $"frame_{i}.jpg";
-                    string filePath = Path.Combine(outputDirectory, fileName);
-                    WritePathsToTxt(filePath);
-                }
-                
-
-
-                isProcessing = true;
-                
+                SomeMethod("FFMPEG Exe çalışmaya başladı");
 
                 while (isProcessing)
                 {
