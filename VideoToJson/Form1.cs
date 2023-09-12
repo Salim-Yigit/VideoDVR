@@ -19,7 +19,8 @@ namespace VideoToJson
         private const int MaxQueueSize = 1000;
         private readonly Queue<byte[]> frameQueue = new Queue<byte[]>();
         private readonly object queueLock = new object();
-        private bool isProcessing = false;
+        private bool isProcessing = false; 
+        private bool isRunning = true;
 
         public Form1()
         {
@@ -94,25 +95,77 @@ namespace VideoToJson
             th.Start();
         }
 
+        private void FolderCreate(string mainPath)
+        {
+            // Mevcut zamanı al.
+            DateTime now = DateTime.Now;
+
+            // Yıl klasörünü oluştur.
+            string yearFolderPath = Path.Combine(mainPath, now.Year.ToString());
+            if (!Directory.Exists(yearFolderPath))
+            {
+                Directory.CreateDirectory(yearFolderPath);
+            }
+
+            // Ay klasörünü oluştur.
+            string monthFolderPath = Path.Combine(yearFolderPath, now.Month.ToString("00"));
+            if (!Directory.Exists(monthFolderPath))
+            {
+                Directory.CreateDirectory(monthFolderPath);
+            }
+
+            // Gün klasörünü oluştur.
+            string dayFolderPath = Path.Combine(monthFolderPath, now.Day.ToString("00"));
+            if (!Directory.Exists(dayFolderPath))
+            {
+                Directory.CreateDirectory(dayFolderPath);
+            }
+
+            // Saat klasörünü oluştur.
+            string hourFolderPath = Path.Combine(dayFolderPath, now.Hour.ToString("00"));
+            if (!Directory.Exists(hourFolderPath))
+            {
+                Directory.CreateDirectory(hourFolderPath);
+            }
+
+            // Dakika klasörünü oluştur.
+            string minuteFolderPath = Path.Combine(hourFolderPath, now.Minute.ToString("00"));
+            if (!Directory.Exists(minuteFolderPath))
+            {
+                Directory.CreateDirectory(minuteFolderPath);
+            }
+
+            // İşlem başarılı.
+            SomeMethod("İşlem Başarılı");
+        }
+
+        private string UpdateOutputDirectory()
+        {
+            string year = DateTime.Now.Year.ToString("00"); // Replace with your desired directory
+            string month = DateTime.Now.Month.ToString("00");
+            string day = DateTime.Now.Day.ToString("00");
+            string hour = DateTime.Now.Hour.ToString("00");
+            string minute = DateTime.Now.Minute.ToString("00");
+
+            string outputDirectory = Path.Combine("C:\\Users\\yigit\\OneDrive\\Masaüstü\\RTSP", year);
+            outputDirectory = Path.Combine(outputDirectory, month);
+            outputDirectory = Path.Combine(outputDirectory, day);
+            outputDirectory = Path.Combine(outputDirectory, hour);
+            outputDirectory = Path.Combine(outputDirectory, minute);
+            return outputDirectory;
+        }
         public void Start()
         {
             // RTSP URL of the live video stream
-            string rtspUrl = "rtsp://admin:admin@10.3.26.18/profile?token=media_profile1&SessionTimeout=60";
+            string rtspUrl = "rtsp://admin:admin@10.3.26.18/profile?token=media_profile1&SessionTimeout=60"; 
+            FolderCreate("C:\\Users\\yigit\\OneDrive\\Masaüstü\\RTSP");
+            string outputDirectory = UpdateOutputDirectory();
 
-            // Output directory for saving JPEG frames
-            string outputDirectory = "C:\\Users\\yigit\\OneDrive\\Masaüstü\\yeni"; // Replace with your desired directory
-
-            Directory.CreateDirectory(outputDirectory);
-            
-
-            // Create a process to run ffmpeg
             using (Process process = new Process())
             {
-                // Set the command to run ffmpeg
-
                 process.StartInfo.FileName = "ffmpeg";
 
-                process.StartInfo.Arguments = $"-report -i {rtspUrl} -vf fps=15 {outputDirectory}\\{DateTime.Now.ToString("yyyy_dd_MM_HH_mm_ss")}_frame%d.jpg";
+                process.StartInfo.Arguments = $"-i {rtspUrl} -vf fps=30 {outputDirectory}\\{DateTime.Now.ToString("yyyy_dd_MM_HH_mm_ss")}_frame%d.jpg";
 
                 process.StartInfo.UseShellExecute = false;
 
@@ -120,32 +173,28 @@ namespace VideoToJson
 
                 process.StartInfo.CreateNoWindow = true;
 
-               
-                process.Start();
+                Stopwatch stopwatch = new Stopwatch();
+                stopwatch.Start();
 
-                SomeMethod("FFMPEG Exe çalışmaya başladı");
-
-                while (isProcessing)
+                while (stopwatch.Elapsed.TotalSeconds < 60 )
                 {
-                    byte[] frameData = DequeueFrame();
+                    process.Start();
 
+                    SomeMethod(process.ProcessName);
 
-                    //StreamWriter sw = new StreamWriter("C:\\Users\\yigit\\OneDrive\\Masaüstü\\jpeg_paths.txt", true, Encoding.UTF8);
-                    
-                    //SomeMethod(filePath);
-                    watch.Start();
-                    Thread.Sleep(1000);
-                    JpegToJson.ImagetoJson("C:\\Users\\yigit\\OneDrive\\Masaüstü\\jpeg_paths.txt");
-                    DeleteOldestImageFromDisk(outputDirectory);
-                    SomeMethod(watch.StopResult());
-                    //JpegToJson.deleteImagesFromDatabase();
+                     //watch.Start();
+                     //JpegToJson.ImagetoJson("C:\\Users\\yigit\\OneDrive\\Masaüstü\\jpeg_paths.txt");
+                     //SomeMethod(watch.StopResult());
+                   
                 }
-
+                stopwatch.Stop();
                 process.WaitForExit();
-            }
-
-
+                process.Close();
+                outputDirectory = UpdateOutputDirectory();
+            }        
         }
+
+
         private void SomeMethod(string result)
         {
             if (InvokeRequired)

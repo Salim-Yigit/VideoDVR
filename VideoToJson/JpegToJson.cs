@@ -15,7 +15,7 @@ namespace VideoToJson
     {
         public static void ImagetoJson(string txtPath)
         {
-            string imageFolderPath = "C:\\Users\\yigit\\OneDrive\\Masaüstü\\yeni"; // Klasör yolunu ayarlayın
+            //string imageFolderPath = "C:\\Users\\yigit\\OneDrive\\Masaüstü\\yeni"; // Klasör yolunu ayarlayın
 
             // MongoDB bağlantı bilgilerini ayarlayın
             string connectionString = "mongodb://localhost:27017"; // MongoDB sunucu bağlantı adresi
