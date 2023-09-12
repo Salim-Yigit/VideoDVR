@@ -170,29 +170,25 @@ namespace VideoToJson
                 Stopwatch stopwatch = new Stopwatch();
                 stopwatch.Start();
 
-                while (stopwatch.Elapsed.TotalSeconds < 60 )
+                while (stopwatch.Elapsed.TotalSeconds < 60)
                 {
                     process.Start();
-               
+
                     SomeMethod(process.ProcessName);
 
-                     //watch.Start();
-                     //JpegToJson.ImagetoJson("C:\\Users\\yigit\\OneDrive\\Masaüstü\\jpeg_paths.txt");
-                     //SomeMethod(watch.StopResult());
-                   
-                    JpegToJson.ImagetoJson("C:\\Users\\yigit\\OneDrive\\Masaüstü\\jpeg_paths.txt");
+                    //watch.Start();
+                    //JpegToJson.ImagetoJson("C:\\Users\\yigit\\OneDrive\\Masaüstü\\jpeg_paths.txt");
+                    //SomeMethod(watch.StopResult());
+
+                }
                 stopwatch.Stop();
                 process.WaitForExit();
                 process.Close();
                 outputDirectory = UpdateOutputDirectory();
-            }        
-        }
-                }
-
+                      
             }
-
-
         }
+
         private void SomeMethod(string result)
         {
             if (InvokeRequired)
