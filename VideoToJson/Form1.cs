@@ -128,7 +128,7 @@ namespace VideoToJson
             }
 
             // İşlem başarılı.
-            SomeMethod("İşlem Başarılı");
+            PrintResult("İşlem Başarılı");
         }
 
         private string UpdateOutputDirectory()
@@ -159,9 +159,8 @@ namespace VideoToJson
             {
                 process.StartInfo.FileName = "ffmpeg";
 
-                process.StartInfo.Arguments = $"-i {rtspUrl} -vf fps=30 {outputDirectory}\\{DateTime.Now.ToString("yyyy_dd_MM_HH_mm_ss")}_frame%d.jpg";
+                process.StartInfo.Arguments = $"-i {rtspUrl} -vf fps=30 {outputDirectory}\\frame_%d.jpg";
 
-                
 
                 process.StartInfo.UseShellExecute = false;
 
@@ -169,18 +168,17 @@ namespace VideoToJson
 
                 Stopwatch stopwatch = new Stopwatch();
                 stopwatch.Start();
-
+                process.Start();
+                
                 while (stopwatch.Elapsed.TotalSeconds < 60)
                 {
-                    process.Start();
-
-                    SomeMethod(process.ProcessName);
-
-                    //watch.Start();
-                    //JpegToJson.ImagetoJson("C:\\Users\\yigit\\OneDrive\\Masaüstü\\jpeg_paths.txt");
-                    //SomeMethod(watch.StopResult());
-
+                    //"C:\Users\yigit\OneDrive\Masaüstü\RTSP\2023\09\12\11\20\frame_1.jpg"
+                    //PrintResult(process.ProcessName);
+                    watch.Start();
+                    JpegToJson.ImagetoJson(outputDirectory,1800);
+                    PrintResult(watch.StopResult());
                 }
+
                 stopwatch.Stop();
                 process.WaitForExit();
                 process.Close();
@@ -189,14 +187,14 @@ namespace VideoToJson
             }
         }
 
-        private void SomeMethod(string result)
+        private void PrintResult(string result)
         {
             if (InvokeRequired)
-                Invoke(new MethodInvoker(() => SomeMethods(this, result)));
+                Invoke(new MethodInvoker(() => PrintResult(this, result)));
             else
-                SomeMethods(this, result);
+                PrintResult(this, result);
         }
-        public void SomeMethods(Form frm, string asdf) { frm.Text = asdf; }
+        public void PrintResult(Form frm, string asdf) { frm.Text = asdf; }
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             Process.GetProcessesByName("ffmpeg")[0].Kill();
