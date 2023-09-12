@@ -8,12 +8,13 @@ using MongoDB.Driver;
 using MongoDB.Bson;
 using System.Collections.ObjectModel;
 using Amazon.Runtime.Documents;
+using ZstdSharp.Unsafe;
 
 namespace VideoToJson
 {
-    class JpegToJson
+    class JpegToJson 
     {
-        public static void ImagetoJson(int maxSize)
+        public static void ImagetoJson(string ImageFolder,int maxSize)
         {
             //string imageFolderPath = "C:\\Users\\yigit\\OneDrive\\Masaüstü\\yeni"; // Klasör yolunu ayarlayın
 
@@ -26,57 +27,47 @@ namespace VideoToJson
             var client = new MongoClient(connectionString);
             var database = client.GetDatabase(databaseName);
             IMongoCollection<BsonDocument> collection = database.GetCollection<BsonDocument>(collectionName);
-
+            string fileNamePath,tmp;
             // Klasördeki tüm JPEG dosyalarını al
-            string[] imageFiles = File.ReadAllLines(imageFolderPath);
 
-            foreach (string imageFilePath in imageFiles)
+            for (int i = 1; i < maxSize; i++)
             {
-                // Check if the image file exists
-                if (!File.Exists(imageFilePath))
+                tmp = "frame_" + i.ToString()+".jpg";
+                fileNamePath = Path.Combine(ImageFolder,tmp);
+                
+                if (File.Exists(fileNamePath))
                 {
-                    Console.WriteLine($"Image file not found: {imageFilePath}");
-                    continue;
+                    byte[] imageData = File.ReadAllBytes(fileNamePath);
+
+                    // Encode the image data to base64
+                    string imageBase64 = Convert.ToBase64String(imageData);
+
+                    DateTime timestamp = DateTime.Now;
+
+                    var imageDataObj = new
+                    {
+                        Image = imageBase64,
+                        Timestamp = timestamp
+                    };
+
+                    string json = Newtonsoft.Json.JsonConvert.SerializeObject(imageDataObj);
+
+                    BsonDocument bsonDocument = BsonDocument.Parse(json);
+
+                    if (collection.CountDocuments(FilterDefinition<BsonDocument>.Empty) >= maxSize)
+                    {
+                        // Eğer koleksiyon belirlediğiniz limiti aşıyorsa, en eski belgeyi silin
+                        var oldestDocument = collection.Find(FilterDefinition<BsonDocument>.Empty)
+                            .Sort(Builders<BsonDocument>.Sort.Ascending("timestamp"))
+                            .First();
+                        collection.DeleteOne(oldestDocument);
+                    }
+
+                    collection.InsertOne(bsonDocument);
                 }
-
-                // Read the image file into a byte array
-                byte[] imageData = File.ReadAllBytes(imageFilePath);
-
-                // Encode the image data to base64
-                string imageBase64 = Convert.ToBase64String(imageData);
-
-                DateTime timestamp = DateTime.Now;
-
-                // Create a JSON object to hold the encoded image data and timestamp
-                var imageDataObj = new
-                {
-                    Image = imageBase64,
-                    Timestamp = timestamp
-                };
-                // Create a JSON object to hold the encoded image data
-                //var imageDataObj = new { Image = imageBase64 };
-
-                // Serialize the JSON object to a string
-                string json = Newtonsoft.Json.JsonConvert.SerializeObject(imageDataObj);
-
-                BsonDocument bsonDocument = BsonDocument.Parse(json);
-
-                // BsonDocument'i MongoDB koleksiyonuna ekleyin
-                if (collection.CountDocuments(FilterDefinition<BsonDocument>.Empty) >= maxSize)
-                {
-                    // Eğer koleksiyon belirlediğiniz limiti aşıyorsa, en eski belgeyi silin
-                    var oldestDocument = collection.Find(FilterDefinition<BsonDocument>.Empty)
-                        .Sort(Builders<BsonDocument>.Sort.Ascending("timestamp"))
-                        .First();
-                    collection.DeleteOne(oldestDocument);
-                }
-
-                // Yeni belgeyi ekleyin
-                collection.InsertOne(bsonDocument);
-                Console.WriteLine($"Image encoded and saved to MongoDB: {imageFilePath}");
+                
             }
 
-            Console.WriteLine("All images processed and saved to MongoDB.");
         }
         public static void deleteImagesFromDatabase(int maxSize)
         {
