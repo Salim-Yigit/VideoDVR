@@ -13,7 +13,7 @@ namespace VideoToJson
 {
     class JpegToJson
     {
-        public static void ImagetoJson(string txtPath)
+        public static void ImagetoJson(int maxSize)
         {
             //string imageFolderPath = "C:\\Users\\yigit\\OneDrive\\Masaüstü\\yeni"; // Klasör yolunu ayarlayın
 
@@ -21,14 +21,14 @@ namespace VideoToJson
             string connectionString = "mongodb://localhost:27017"; // MongoDB sunucu bağlantı adresi
             string databaseName = "LiveVideo";
             string collectionName = "Frames";
-            int maxSize = 1000;
+            
 
             var client = new MongoClient(connectionString);
             var database = client.GetDatabase(databaseName);
             IMongoCollection<BsonDocument> collection = database.GetCollection<BsonDocument>(collectionName);
 
             // Klasördeki tüm JPEG dosyalarını al
-            string[] imageFiles = File.ReadAllLines(txtPath);
+            string[] imageFiles = File.ReadAllLines(imageFolderPath);
 
             foreach (string imageFilePath in imageFiles)
             {
@@ -78,7 +78,7 @@ namespace VideoToJson
 
             Console.WriteLine("All images processed and saved to MongoDB.");
         }
-        public static void deleteImagesFromDatabase()
+        public static void deleteImagesFromDatabase(int maxSize)
         {
             //string imageFolderPath = "C:\\Users\\yigit\\OneDrive\\Masaüstü\\yeni"; // Klasör yolunu ayarlayın
 
@@ -98,7 +98,7 @@ namespace VideoToJson
 
             var oldestImages = collection.Find(filter)
                 .Sort(sort)
-                .Limit(1000)
+                .Limit(maxSize)
                 .ToList();
             foreach (var image in oldestImages)
             {

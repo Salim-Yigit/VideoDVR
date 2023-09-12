@@ -51,37 +51,23 @@ namespace VideoToJson
             }
         }
 
-        private void DeleteOldestImageFromDisk(string outputDirectory)
+        private void DeleteOldestImageFromDisk(string outputDirectory,int maxSize)
         {
 
             // Output dizini içindeki tüm resim dosyalarını al
             string[] imageFiles = Directory.GetFiles(outputDirectory);
 
-            string[] sortedNames = new string[imageFiles.Length];
-            //Array.Copy(imageFiles, sortedNames, imageFiles.Length);
-
-            // Kopya diziyi sırala
-            Array.Sort(imageFiles, (a, b) => File.GetCreationTime(a).CompareTo(File.GetCreationTime(b)));
-
-            if (sortedNames.Length > 1000)
-            {
-                //Console.WriteLine(imageFiles[0]);
-                string oldestImagePath = sortedNames[0];
-
-                // İlk resmi sil
-                if (File.Exists(oldestImagePath))
+            if(imageFiles.Length >= maxSize) 
+            { 
+                int silinmeSayisi = imageFiles.Length - maxSize;
+                for(int i = 0; i < silinmeSayisi; i++)
                 {
-                    // Dosyayı kapat
-                    using (FileStream fileStream = new FileStream(oldestImagePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
-                    {
-                        fileStream.Close();
-                    }
-
-                    File.Delete(oldestImagePath);
+                    File.Delete(imageFiles[i]);
+                   
                 }
             }
-
         }
+
         public void WritePathsToTxt(string path)
         {
             using (StreamWriter sw = new StreamWriter("C:\\Users\\yigit\\OneDrive\\Masaüstü\\jpeg_paths.txt", true))
@@ -89,11 +75,17 @@ namespace VideoToJson
                 sw.WriteLine(path);
             }
         }
+
+        public void SilTxtIcerik(string dosyaYolu)
+        {
+            // Dosyanın içeriğini sıfırla
+            File.WriteAllText(dosyaYolu, string.Empty);
+        }
         private void Form1_Load(object sender, EventArgs e)
         {
             Thread th = new Thread(Start);
             th.Start();
-        }
+        } 
 
         private void FolderCreate(string mainPath)
         {
@@ -161,17 +153,19 @@ namespace VideoToJson
             FolderCreate("C:\\Users\\yigit\\OneDrive\\Masaüstü\\RTSP");
             string outputDirectory = UpdateOutputDirectory();
 
+
+            // Create a process to run ffmpeg
             using (Process process = new Process())
             {
                 process.StartInfo.FileName = "ffmpeg";
 
                 process.StartInfo.Arguments = $"-i {rtspUrl} -vf fps=30 {outputDirectory}\\{DateTime.Now.ToString("yyyy_dd_MM_HH_mm_ss")}_frame%d.jpg";
 
+                
+
                 process.StartInfo.UseShellExecute = false;
 
                 process.StartInfo.RedirectStandardOutput = true;
-
-                process.StartInfo.CreateNoWindow = true;
 
                 Stopwatch stopwatch = new Stopwatch();
                 stopwatch.Start();
@@ -179,22 +173,26 @@ namespace VideoToJson
                 while (stopwatch.Elapsed.TotalSeconds < 60 )
                 {
                     process.Start();
-
+               
                     SomeMethod(process.ProcessName);
 
                      //watch.Start();
                      //JpegToJson.ImagetoJson("C:\\Users\\yigit\\OneDrive\\Masaüstü\\jpeg_paths.txt");
                      //SomeMethod(watch.StopResult());
                    
-                }
+                    JpegToJson.ImagetoJson("C:\\Users\\yigit\\OneDrive\\Masaüstü\\jpeg_paths.txt");
                 stopwatch.Stop();
                 process.WaitForExit();
                 process.Close();
                 outputDirectory = UpdateOutputDirectory();
             }        
         }
+                }
+
+            }
 
 
+        }
         private void SomeMethod(string result)
         {
             if (InvokeRequired)
