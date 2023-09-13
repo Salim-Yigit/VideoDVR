@@ -9,6 +9,8 @@ using MongoDB.Bson;
 using System.Collections.ObjectModel;
 using Amazon.Runtime.Documents;
 using ZstdSharp.Unsafe;
+using System.Security.Cryptography;
+using System.Threading;
 
 namespace VideoToJson
 {
@@ -22,7 +24,10 @@ namespace VideoToJson
             string connectionString = "mongodb://localhost:27017"; // MongoDB sunucu bağlantı adresi
             string databaseName = "LiveVideo";
             string collectionName = "Frames";
-            
+
+            int hedefFPS = 15;
+            int milisaniyeBekleme = 1000 / hedefFPS;
+            milisaniyeBekleme += 15;
 
             var client = new MongoClient(connectionString);
             var database = client.GetDatabase(databaseName);
@@ -34,39 +39,45 @@ namespace VideoToJson
             {
                 tmp = "frame_" + i.ToString()+".jpg";
                 fileNamePath = Path.Combine(ImageFolder,tmp);
-                
-                if (File.Exists(fileNamePath))
+
+                while(!File.Exists(fileNamePath))
                 {
-                    byte[] imageData = File.ReadAllBytes(fileNamePath);
 
-                    // Encode the image data to base64
-                    string imageBase64 = Convert.ToBase64String(imageData);
+                }
+                Thread.Sleep(50);
+                byte[] imageData = File.ReadAllBytes(fileNamePath);
 
-                    DateTime timestamp = DateTime.Now;
+                // Encode the image data to base64
+                string imageBase64 = Convert.ToBase64String(imageData);
 
-                    var imageDataObj = new
-                    {
+                DateTime timestamp = DateTime.Now; 
+                
+                 var imageDataObj = new
+                 {
                         Image = imageBase64,
-                        Timestamp = timestamp
-                    };
+                        Timestamp = timestamp, 
+                        FileNamePath = fileNamePath
+                 };
 
-                    string json = Newtonsoft.Json.JsonConvert.SerializeObject(imageDataObj);
+                 string json = Newtonsoft.Json.JsonConvert.SerializeObject(imageDataObj);
 
-                    BsonDocument bsonDocument = BsonDocument.Parse(json);
-
-                    if (collection.CountDocuments(FilterDefinition<BsonDocument>.Empty) >= maxSize)
-                    {
+                 BsonDocument bsonDocument = BsonDocument.Parse(json);
+                  
+                 
+                 collection.InsertOne(bsonDocument);
+                
+                
+            }
+            /*
+                  if (collection.CountDocuments(FilterDefinition<BsonDocument>.Empty) >= maxSize)
+                  {
                         // Eğer koleksiyon belirlediğiniz limiti aşıyorsa, en eski belgeyi silin
                         var oldestDocument = collection.Find(FilterDefinition<BsonDocument>.Empty)
                             .Sort(Builders<BsonDocument>.Sort.Ascending("timestamp"))
                             .First();
                         collection.DeleteOne(oldestDocument);
-                    }
-
-                    collection.InsertOne(bsonDocument);
-                }
-                
-            }
+                    }  Bence bu bana gecikme yaşatıyor.
+                   */
 
         }
         public static void deleteImagesFromDatabase(int maxSize)

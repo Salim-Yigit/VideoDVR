@@ -19,8 +19,8 @@ namespace VideoToJson
         private const int MaxQueueSize = 1000;
         private readonly Queue<byte[]> frameQueue = new Queue<byte[]>();
         private readonly object queueLock = new object();
-        private bool isProcessing = false; 
-        private bool isRunning = true;
+        private int processMinute = 1;
+        
 
         public Form1()
         {
@@ -89,46 +89,32 @@ namespace VideoToJson
 
         private void FolderCreate(string mainPath)
         {
-            // Mevcut zamanı al.
             DateTime now = DateTime.Now;
-
-            // Yıl klasörünü oluştur.
             string yearFolderPath = Path.Combine(mainPath, now.Year.ToString());
             if (!Directory.Exists(yearFolderPath))
             {
                 Directory.CreateDirectory(yearFolderPath);
             }
-
-            // Ay klasörünü oluştur.
             string monthFolderPath = Path.Combine(yearFolderPath, now.Month.ToString("00"));
             if (!Directory.Exists(monthFolderPath))
             {
                 Directory.CreateDirectory(monthFolderPath);
             }
-
-            // Gün klasörünü oluştur.
             string dayFolderPath = Path.Combine(monthFolderPath, now.Day.ToString("00"));
             if (!Directory.Exists(dayFolderPath))
             {
                 Directory.CreateDirectory(dayFolderPath);
             }
-
-            // Saat klasörünü oluştur.
             string hourFolderPath = Path.Combine(dayFolderPath, now.Hour.ToString("00"));
             if (!Directory.Exists(hourFolderPath))
             {
                 Directory.CreateDirectory(hourFolderPath);
             }
-
-            // Dakika klasörünü oluştur.
             string minuteFolderPath = Path.Combine(hourFolderPath, now.Minute.ToString("00"));
             if (!Directory.Exists(minuteFolderPath))
             {
                 Directory.CreateDirectory(minuteFolderPath);
             }
-
-            // İşlem başarılı.
-            PrintResult("İşlem Başarılı");
         }
 
         private string UpdateOutputDirectory()
@@ -159,7 +145,7 @@ namespace VideoToJson
             {
                 process.StartInfo.FileName = "ffmpeg";
 
-                process.StartInfo.Arguments = $"-i {rtspUrl} -vf fps=30 {outputDirectory}\\frame_%d.jpg";
+                process.StartInfo.Arguments = $"-i {rtspUrl} -vf fps=15 {outputDirectory}\\frame_%d.jpg";
 
 
                 process.StartInfo.UseShellExecute = false;
@@ -169,21 +155,28 @@ namespace VideoToJson
                 Stopwatch stopwatch = new Stopwatch();
                 stopwatch.Start();
                 process.Start();
-                
-                while (stopwatch.Elapsed.TotalSeconds < 60)
+
+                while (!File.Exists(Path.Combine(outputDirectory,"frame_1.jpg")))
                 {
-                    //"C:\Users\yigit\OneDrive\Masaüstü\RTSP\2023\09\12\11\20\frame_1.jpg"
-                    //PrintResult(process.ProcessName);
+
+                }
+
+                int initialState = 0;
+                int frameNumber = processMinute * 900;
+                while (initialState < processMinute)
+                {
+                    
                     watch.Start();
-                    JpegToJson.ImagetoJson(outputDirectory,1800);
+                    JpegToJson.ImagetoJson(outputDirectory,frameNumber);
                     PrintResult(watch.StopResult());
+                    initialState++;
+                    outputDirectory = UpdateOutputDirectory();
                 }
 
                 stopwatch.Stop();
-                process.WaitForExit();
-                process.Close();
                 outputDirectory = UpdateOutputDirectory();
-                      
+                PrintResult("Program sonlandı");
+                Thread.Sleep(1000); 
             }
         }
 
