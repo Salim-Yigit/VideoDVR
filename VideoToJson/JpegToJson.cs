@@ -16,7 +16,7 @@ namespace VideoToJson
 {
     class JpegToJson 
     {
-        public static void ImagetoJson(string ImageFolder,int maxSize)
+        public static void ImagetoJson(string ImageFolder,int maxSize,int currentMinute)
         {
             //string imageFolderPath = "C:\\Users\\yigit\\OneDrive\\Masaüstü\\yeni"; // Klasör yolunu ayarlayın
 
@@ -34,7 +34,6 @@ namespace VideoToJson
             IMongoCollection<BsonDocument> collection = database.GetCollection<BsonDocument>(collectionName);
             string fileNamePath,tmp;
             // Klasördeki tüm JPEG dosyalarını al
-
             for (int i = 1; i < maxSize; i++)
             {
                 tmp = "frame_" + i.ToString()+".jpg";
@@ -42,7 +41,7 @@ namespace VideoToJson
 
                 while(!File.Exists(fileNamePath))
                 {
-
+                     
                 }
                 Thread.Sleep(50);
                 byte[] imageData = File.ReadAllBytes(fileNamePath);
@@ -51,10 +50,17 @@ namespace VideoToJson
                 string imageBase64 = Convert.ToBase64String(imageData);
 
                 DateTime timestamp = DateTime.Now; 
-                
-                 var imageDataObj = new
+
+                if(currentMinute > 0)
+                {
+                    var filter = new BsonDocument("Index", new BsonInt32(i));
+                    collection.DeleteOne(filter);
+                }
+
+                var imageDataObj = new
                  {
                         Image = imageBase64,
+                        Index = i,
                         Timestamp = timestamp, 
                         FileNamePath = fileNamePath
                  };
@@ -62,23 +68,11 @@ namespace VideoToJson
                  string json = Newtonsoft.Json.JsonConvert.SerializeObject(imageDataObj);
 
                  BsonDocument bsonDocument = BsonDocument.Parse(json);
-                  
-                 
+                           
                  collection.InsertOne(bsonDocument);
-                
-                
+                 
             }
-            /*
-                  if (collection.CountDocuments(FilterDefinition<BsonDocument>.Empty) >= maxSize)
-                  {
-                        // Eğer koleksiyon belirlediğiniz limiti aşıyorsa, en eski belgeyi silin
-                        var oldestDocument = collection.Find(FilterDefinition<BsonDocument>.Empty)
-                            .Sort(Builders<BsonDocument>.Sort.Ascending("timestamp"))
-                            .First();
-                        collection.DeleteOne(oldestDocument);
-                    }  Bence bu bana gecikme yaşatıyor.
-                   */
-
+            
         }
         public static void deleteImagesFromDatabase(int maxSize)
         {

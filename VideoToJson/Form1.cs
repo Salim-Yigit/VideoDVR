@@ -19,7 +19,7 @@ namespace VideoToJson
         private const int MaxQueueSize = 1000;
         private readonly Queue<byte[]> frameQueue = new Queue<byte[]>();
         private readonly object queueLock = new object();
-        private int processMinute = 1;
+        private int processMinute = 5;
         
 
         public Form1()
@@ -117,7 +117,7 @@ namespace VideoToJson
             }
         }
 
-        private string UpdateOutputDirectory()
+        public static string UpdateOutputDirectory()
         {
             string year = DateTime.Now.Year.ToString("00"); // Replace with your desired directory
             string month = DateTime.Now.Month.ToString("00");
@@ -138,46 +138,39 @@ namespace VideoToJson
             string rtspUrl = "rtsp://admin:admin@10.3.26.18/profile?token=media_profile1&SessionTimeout=60"; 
             FolderCreate("C:\\Users\\yigit\\OneDrive\\Masaüstü\\RTSP");
             string outputDirectory = UpdateOutputDirectory();
-
-
-            // Create a process to run ffmpeg
-            using (Process process = new Process())
-            {
-                process.StartInfo.FileName = "ffmpeg";
-
-                process.StartInfo.Arguments = $"-i {rtspUrl} -vf fps=15 {outputDirectory}\\frame_%d.jpg";
-
-
-                process.StartInfo.UseShellExecute = false;
-
-                process.StartInfo.RedirectStandardOutput = true;
-
-                Stopwatch stopwatch = new Stopwatch();
-                stopwatch.Start();
-                process.Start();
-
-                while (!File.Exists(Path.Combine(outputDirectory,"frame_1.jpg")))
+            int currentMinute = 0;
+            while(currentMinute < processMinute)
+            {   
+                
+                using (Process process = new Process())
                 {
+                    process.StartInfo.FileName = "ffmpeg";
 
-                }
+                    process.StartInfo.Arguments = $"-i {rtspUrl} -vf fps=15 {outputDirectory}\\frame_%d.jpg";
 
-                int initialState = 0;
-                int frameNumber = processMinute * 900;
-                while (initialState < processMinute)
-                {
-                    
+
+                    process.StartInfo.UseShellExecute = false;
+
+                    process.StartInfo.RedirectStandardOutput = true;
+
+                    process.Start();
+
+                    while (!File.Exists(Path.Combine(outputDirectory, "frame_1.jpg")))
+                    {
+
+                    }
+
+                    int frameNumber = processMinute * 900;
                     watch.Start();
-                    JpegToJson.ImagetoJson(outputDirectory,frameNumber);
-                    PrintResult(watch.StopResult());
-                    initialState++;
-                    outputDirectory = UpdateOutputDirectory();
+                    JpegToJson.ImagetoJson(outputDirectory, 900,currentMinute);
+                    PrintResult(watch.StopResult());   
+                    process.Close();
                 }
-
-                stopwatch.Stop();
                 outputDirectory = UpdateOutputDirectory();
-                PrintResult("Program sonlandı");
-                Thread.Sleep(1000); 
+                currentMinute++;
             }
+            // Create a process to run ffmpeg
+            
         }
 
         private void PrintResult(string result)
