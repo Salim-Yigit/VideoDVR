@@ -41,7 +41,7 @@ namespace VideoToJson
                 {
                      
                 }
-                Thread.Sleep(10);
+                Thread.Sleep(15);
                 byte[] imageData = File.ReadAllBytes(fileNamePath);
 
                 // Encode the image data to base64
@@ -52,6 +52,11 @@ namespace VideoToJson
                 if(currentMinute > 0)
                 {
                     var filter = new BsonDocument("Index", new BsonInt32(i));
+                    var data = collection.Find(filter).ToList();
+                    foreach (var path in data)
+                    {
+                        File.Delete(path["FileNamePath"].AsString);
+                    }
                     collection.DeleteOne(filter);
                 }
 

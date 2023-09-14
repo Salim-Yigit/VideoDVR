@@ -136,12 +136,14 @@ namespace VideoToJson
         {
             // RTSP URL of the live video stream
             string rtspUrl = "rtsp://admin:admin@10.3.26.18/profile?token=media_profile1&SessionTimeout=60"; 
-            FolderCreate("C:\\Users\\yigit\\OneDrive\\Masaüstü\\RTSP");
-            string outputDirectory = UpdateOutputDirectory();
+            
+            string outputDirectory;
             int currentMinute = 0;
             while(currentMinute < processMinute)
-            {   
-                
+            {
+                FolderCreate("C:\\Users\\yigit\\OneDrive\\Masaüstü\\RTSP"); 
+                outputDirectory = UpdateOutputDirectory();
+
                 using (Process process = new Process())
                 {
                     process.StartInfo.FileName = "C:\\Users\\yigit\\OneDrive\\Masaüstü\\EskiHali\\VideoSaveToDatabase\\VideoToJson\\bin\\Debug\\ffmpeg.exe";
@@ -162,16 +164,14 @@ namespace VideoToJson
 
                     }
                     watch.Start();
-                    JpegToJson.ImagetoJson(outputDirectory, 900,currentMinute);
+                    JpegToJson.ImagetoJson(outputDirectory, 901,currentMinute);
                     PrintResult(watch.StopResult());
                     process.Kill();
                     process.Close();
                 }
-                FolderCreate("C:\\Users\\yigit\\OneDrive\\Masaüstü\\RTSP");  
-                outputDirectory = UpdateOutputDirectory();
                 currentMinute++;
             }
-            // Create a process to run ffmpeg
+            PrintResult("Program Sonlandı!!!!!!!!!!!!!!!");    
             
         }
 
