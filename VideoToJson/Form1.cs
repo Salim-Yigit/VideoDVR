@@ -153,6 +153,8 @@ namespace VideoToJson
 
                     process.StartInfo.RedirectStandardOutput = true;
 
+                    process.StartInfo.CreateNoWindow = true;    
+
                     process.Start();
 
                     while (!File.Exists(Path.Combine(outputDirectory, "frame_1.jpg")))
@@ -162,6 +164,7 @@ namespace VideoToJson
                     watch.Start();
                     JpegToJson.ImagetoJson(outputDirectory, 900,currentMinute);
                     PrintResult(watch.StopResult());
+                    process.Kill();
                     process.Close();
                 }
                 FolderCreate("C:\\Users\\yigit\\OneDrive\\Masaüstü\\RTSP");  
