@@ -25,15 +25,13 @@ namespace VideoToJson
             string databaseName = "LiveVideo";
             string collectionName = "Frames";
 
-            int hedefFPS = 15;
-            int milisaniyeBekleme = 1000 / hedefFPS;
-            milisaniyeBekleme += 15;
+
 
             var client = new MongoClient(connectionString);
             var database = client.GetDatabase(databaseName);
             IMongoCollection<BsonDocument> collection = database.GetCollection<BsonDocument>(collectionName);
             string fileNamePath,tmp;
-            // Klasördeki tüm JPEG dosyalarını al
+            
             for (int i = 1; i < maxSize; i++)
             {
                 tmp = "frame_" + i.ToString()+".jpg";
@@ -43,7 +41,7 @@ namespace VideoToJson
                 {
                      
                 }
-                Thread.Sleep(50);
+                Thread.Sleep(10);
                 byte[] imageData = File.ReadAllBytes(fileNamePath);
 
                 // Encode the image data to base64
