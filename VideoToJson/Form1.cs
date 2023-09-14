@@ -144,7 +144,7 @@ namespace VideoToJson
                 
                 using (Process process = new Process())
                 {
-                    process.StartInfo.FileName = "ffmpeg";
+                    process.StartInfo.FileName = "C:\\Users\\yigit\\OneDrive\\Masaüstü\\EskiHali\\VideoSaveToDatabase\\VideoToJson\\bin\\Debug\\ffmpeg.exe";
 
                     process.StartInfo.Arguments = $"-i {rtspUrl} -vf fps=15 {outputDirectory}\\frame_%d.jpg";
 
@@ -159,13 +159,12 @@ namespace VideoToJson
                     {
 
                     }
-
-                    int frameNumber = processMinute * 900;
                     watch.Start();
                     JpegToJson.ImagetoJson(outputDirectory, 900,currentMinute);
-                    PrintResult(watch.StopResult());   
+                    PrintResult(watch.StopResult());
                     process.Close();
                 }
+                FolderCreate("C:\\Users\\yigit\\OneDrive\\Masaüstü\\RTSP");  
                 outputDirectory = UpdateOutputDirectory();
                 currentMinute++;
             }
