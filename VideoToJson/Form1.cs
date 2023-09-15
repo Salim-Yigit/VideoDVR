@@ -16,9 +16,6 @@ namespace VideoToJson
     public partial class Form1 : Form
     {
         Watch watch;
-        private const int MaxQueueSize = 1000;
-        private readonly Queue<byte[]> frameQueue = new Queue<byte[]>();
-        private readonly object queueLock = new object();
         private int processMinute = 5;
         
 
@@ -27,60 +24,7 @@ namespace VideoToJson
             InitializeComponent();
             watch = new Watch();
         }
-        private void EnqueueFrame(byte[] frameData)
-        {
-            lock (queueLock)
-            {
-                frameQueue.Enqueue(frameData);
-                while (frameQueue.Count > MaxQueueSize)
-                {
-                    frameQueue.Dequeue(); // FIFO: Eski kareleri sil
-                }
-            }
-        }
-
-        private byte[] DequeueFrame()
-        {
-            lock (queueLock)
-            {
-                if (frameQueue.Count > 0)
-                {
-                    return frameQueue.Dequeue();
-                }
-                return null;
-            }
-        }
-
-        private void DeleteOldestImageFromDisk(string outputDirectory,int maxSize)
-        {
-
-            // Output dizini içindeki tüm resim dosyalarını al
-            string[] imageFiles = Directory.GetFiles(outputDirectory);
-
-            if(imageFiles.Length >= maxSize) 
-            { 
-                int silinmeSayisi = imageFiles.Length - maxSize;
-                for(int i = 0; i < silinmeSayisi; i++)
-                {
-                    File.Delete(imageFiles[i]);
-                   
-                }
-            }
-        }
-
-        public void WritePathsToTxt(string path)
-        {
-            using (StreamWriter sw = new StreamWriter("C:\\Users\\yigit\\OneDrive\\Masaüstü\\jpeg_paths.txt", true))
-            {
-                sw.WriteLine(path);
-            }
-        }
-
-        public void SilTxtIcerik(string dosyaYolu)
-        {
-            // Dosyanın içeriğini sıfırla
-            File.WriteAllText(dosyaYolu, string.Empty);
-        }
+       
         private void Form1_Load(object sender, EventArgs e)
         {
             Thread th = new Thread(Start);
@@ -183,50 +127,29 @@ namespace VideoToJson
                 PrintResult(this, result);
         }
         public void PrintResult(Form frm, string asdf) { frm.Text = asdf; }
-        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+
+        private void numericUpDown1_ValueChanged(object sender, EventArgs e)
         {
-            Process.GetProcessesByName("ffmpeg")[0].Kill();
-            Environment.Exit(0);
+
         }
 
-        public void KillProcess(int pid) {
-            ManagementObjectSearcher processSearcher = new ManagementObjectSearcher
-              ("Select * From Win32_Process Where ParentProcessID=" + pid);
-            ManagementObjectCollection processCollection = processSearcher.Get();
-
-            try
-            {
-                Process proc = Process.GetProcessById(pid);
-                if (!proc.HasExited) proc.Kill();
-            }
-            catch (ArgumentException)
-            {
-                // Process already exited.
-            }
-
-            if (processCollection != null)
-            {
-                foreach (ManagementObject mo in processCollection)
-                {
-                    KillProcess(Convert.ToInt32(mo["ProcessID"])); //kill child processes(also kills childrens of childrens etc.)
-                }
-            }
-        }
-        public static List<string> yollariDosyayaYaz()
+        private void label1_Click(object sender, EventArgs e)
         {
-            int imageCount = 0;
-            List<string> imagePaths = new List<string>();
-            
-            imageCount++;
-            string imagePath = Path.Combine("C:\\Users\\yigit\\OneDrive\\Masaüstü\\jpeg_paths.txt", $"frame_{imageCount:D4}.jpg");
 
-            // Dosyayı yazmadan önce kapat
-            
+        }
 
-                
-            imagePaths.Add(imagePath);
-           
-            return imagePaths;
+        private void label2_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label3_Click(object sender, EventArgs e)
+        {
 
         }
     }
