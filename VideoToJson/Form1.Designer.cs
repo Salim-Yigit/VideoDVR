@@ -1,4 +1,7 @@
-﻿namespace VideoToJson
+﻿using System;
+using System.Windows.Forms;
+
+namespace VideoToJson
 {
     partial class Form1
     {
@@ -37,6 +40,8 @@
             this.PrevTimeButton = new System.Windows.Forms.Button();
             this.FutureInfoButton = new System.Windows.Forms.Button();
             this.LoadingVideoLabel = new System.Windows.Forms.Label();
+            this.LabelControl1 = new System.Windows.Forms.Label();
+            this.LabelControl2 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // VideoProgressBar
@@ -44,7 +49,7 @@
             this.VideoProgressBar.Location = new System.Drawing.Point(201, 360);
             this.VideoProgressBar.Name = "VideoProgressBar";
             this.VideoProgressBar.Size = new System.Drawing.Size(458, 44);
-            this.VideoProgressBar.TabIndex = 0; 
+            this.VideoProgressBar.TabIndex = 0;
             this.VideoProgressBar.Visible = false;
             // 
             // SaveVideoButton
@@ -55,6 +60,7 @@
             this.SaveVideoButton.TabIndex = 1;
             this.SaveVideoButton.Text = "Video Kaydet";
             this.SaveVideoButton.UseVisualStyleBackColor = true;
+            this.SaveVideoButton.Click += new System.EventHandler(this.SaveVideoButton_Click);
             // 
             // StartInfoLabel
             // 
@@ -65,7 +71,6 @@
             this.StartInfoLabel.TabIndex = 2;
             this.StartInfoLabel.Text = "Video kaydetme işlemini şu andan kaç saniye önce başlatmak istersiniz?\r\n(Saniye o" +
     "larak giriniz.)\r\n\r\n";
-            this.StartInfoLabel.Click += new System.EventHandler(this.label1_Click);
             // 
             // FutureInfoLabel
             // 
@@ -76,7 +81,6 @@
             this.FutureInfoLabel.TabIndex = 3;
             this.FutureInfoLabel.Text = "Video kaydetme işlemini şu andan kaç saniye sonra sonlandırmak istersiniz?\r\n(Sani" +
     "ye olarak giriniz.)";
-            this.FutureInfoLabel.Click += new System.EventHandler(this.label2_Click);
             // 
             // PrevTimeText
             // 
@@ -100,7 +104,7 @@
             this.PrevTimeButton.TabIndex = 6;
             this.PrevTimeButton.Text = "Zamanı \r\nKaydet\r\n";
             this.PrevTimeButton.UseVisualStyleBackColor = true;
-            this.PrevTimeButton.Click += new System.EventHandler(this.button2_Click);
+            this.PrevTimeButton.Click += new System.EventHandler(this.PrevButton_Click);
             // 
             // FutureInfoButton
             // 
@@ -110,6 +114,7 @@
             this.FutureInfoButton.TabIndex = 7;
             this.FutureInfoButton.Text = "Zamanı \r\nKaydet";
             this.FutureInfoButton.UseVisualStyleBackColor = true;
+            this.FutureInfoButton.Click += new System.EventHandler(this.FutureButton_Click);
             // 
             // LoadingVideoLabel
             // 
@@ -119,14 +124,32 @@
             this.LoadingVideoLabel.Size = new System.Drawing.Size(121, 16);
             this.LoadingVideoLabel.TabIndex = 8;
             this.LoadingVideoLabel.Text = "Video Kaydediliyor";
-            this.LoadingVideoLabel.Click += new System.EventHandler(this.label3_Click);
-            this.LoadingVideoLabel.Visible = false; 
+            this.LoadingVideoLabel.Visible = false;
+            // 
+            // LabelControl1
+            // 
+            this.LabelControl1.AutoSize = true;
+            this.LabelControl1.Location = new System.Drawing.Point(303, 93);
+            this.LabelControl1.Name = "LabelControl1";
+            this.LabelControl1.Size = new System.Drawing.Size(0, 16);
+            this.LabelControl1.TabIndex = 9;
+            // 
+            // LabelControl2
+            // 
+            this.LabelControl2.AutoSize = true;
+            this.LabelControl2.Location = new System.Drawing.Point(303, 229);
+            this.LabelControl2.Name = "LabelControl2";
+            this.LabelControl2.Size = new System.Drawing.Size(0, 16);
+            this.LabelControl2.TabIndex = 10;
+            this.LabelControl2.Click += new System.EventHandler(this.LabelControl2_Click);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.LabelControl2);
+            this.Controls.Add(this.LabelControl1);
             this.Controls.Add(this.LoadingVideoLabel);
             this.Controls.Add(this.FutureInfoButton);
             this.Controls.Add(this.PrevTimeButton);
@@ -138,7 +161,7 @@
             this.Controls.Add(this.VideoProgressBar);
             this.Name = "Form1";
             this.Text = "Form1";
-            //this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.Load += new System.EventHandler(this.Form1_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -156,6 +179,8 @@
         private System.Windows.Forms.Button PrevTimeButton;
         private System.Windows.Forms.Button FutureInfoButton;
         private System.Windows.Forms.Label LoadingVideoLabel;
+        private Label LabelControl1;
+        private Label LabelControl2;
     }
 }
 
