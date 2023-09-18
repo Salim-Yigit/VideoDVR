@@ -47,7 +47,8 @@ namespace VideoToJson
                 // Encode the image data to base64
                 string imageBase64 = Convert.ToBase64String(imageData);
 
-                DateTime timestamp = DateTime.Now; 
+                DateTime timestamp = DateTime.Now;
+                
 
                 if(currentMinute > 0)
                 {
@@ -64,7 +65,7 @@ namespace VideoToJson
                  {
                         Image = imageBase64,
                         Index = i,
-                        Timestamp = timestamp, 
+                        Timestamp = timestamp.ToString("yyyy-MM-dd HH:mm:ss"), 
                         FileNamePath = fileNamePath
                  };
 
