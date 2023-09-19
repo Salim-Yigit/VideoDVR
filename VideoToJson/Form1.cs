@@ -24,6 +24,7 @@ namespace VideoToJson
         private int processMinute = 5;
         private int prevTime; 
         private int futureTime;
+        private string outputDirectory;
         Thread th;
 
         public Form1()
@@ -87,7 +88,6 @@ namespace VideoToJson
         {
             // RTSP URL of the live video stream
             string rtspUrl = "rtsp://admin:admin@10.3.26.18/profile?token=media_profile1&SessionTimeout=60";
-            string outputDirectory;
             int currentMinute = 0;
             PrintResult("Program Başladı.");
             while(currentMinute < processMinute)
@@ -136,12 +136,15 @@ namespace VideoToJson
 
             int indexStart = 900 - (this.prevTime*15);
             int indexFinish = this.futureTime * 15;
-
+            int toplam = this.prevTime * 15 + this.futureTime * 15;
+            List<string> imagesPath = new List<string>(); 
             string connectionString = "mongodb://localhost:27017"; // MongoDB sunucu bağlantı adresi
 
             IMongoClient mongoClient = new MongoClient(connectionString);
             IMongoDatabase database = mongoClient.GetDatabase("LiveVideo");
             IMongoCollection<BsonDocument> collection = database.GetCollection<BsonDocument>("Frames");
+
+             
 
             for (int i = indexStart;i<901;i++)
             {
@@ -149,16 +152,8 @@ namespace VideoToJson
                 var data = collection.Find(filter).ToList();
                 foreach (var j in data)
                 {
-                    string base64Stirng = j["Image"].AsString;
-                    byte[] byteArray = Convert.FromBase64String(base64Stirng); 
-
-                    using(MemoryStream memoryStream = new MemoryStream(byteArray))
-                    {
-                        Image image = Image.FromStream(memoryStream);
-
-                        image.Save("C:\\Users\\yigit\\OneDrive\\Masaüstü\\VideoResimleri\\" + "frame" + j["Index"].ToString() + ".jpg");
-                    }
-                    
+                    string imagePath = j["FileNamePath"].AsString;
+                    imagesPath.Add(imagePath);
                     
                 }
             }
@@ -169,19 +164,32 @@ namespace VideoToJson
                 var data = collection.Find(filter).ToList();
                 foreach (var j in data)
                 {
-                    string base64Stirng = j["Image"].AsString;
-                    byte[] byteArray = Convert.FromBase64String(base64Stirng);
-
-                    using (MemoryStream memoryStream = new MemoryStream(byteArray))
-                    {
-                        Image image = Image.FromStream(memoryStream);
-
-                        image.Save("C:\\Users\\yigit\\OneDrive\\Masaüstü\\VideoResimleri\\" + "frame" + j["Index"].ToString()+".jpg");
-                    }
-
+                    string imagePath = j["FileNamePath"].AsString;
+                    imagesPath.Add(imagePath);
 
                 }
             }
+            string imagesFolder1 = UpdateOutputDirectory();
+            using (Process ffmpegProcess = new Process())
+            {
+                ffmpegProcess.StartInfo.FileName = "ffmpeg"; // FFmpeg'in yolunu belirtin
+                ffmpegProcess.StartInfo.UseShellExecute = false;
+                ffmpegProcess.StartInfo.RedirectStandardInput = true;
+                ffmpegProcess.StartInfo.RedirectStandardOutput = true;
+                ffmpegProcess.StartInfo.RedirectStandardError = true;
+                ffmpegProcess.StartInfo.CreateNoWindow = true;
+
+                // FFmpeg komutunu oluşturun 
+                string imageFiles = string.Join(" ",imagesPath); // Resim dosyalarını birleştirin
+                string videoOutputFile = "C:\\Users\\yigit\\OneDrive\\Masaüstü\\ArtLabKatılımcılar.txt\\output.mp4";
+                string ffmpegCommand = $"-framerate 15 -i {imagesFolder1}//frame_%d.jpg -c:v libx264 -r 30 {videoOutputFile}";
+                ffmpegProcess.StartInfo.Arguments = ffmpegCommand;
+
+                ffmpegProcess.Start(); 
+                Thread.Sleep(2000);
+                ffmpegProcess.Close();
+            }
+            PrintResult("Video Oluşturuldu");
         }
 
         private void PrintResult(string result)
