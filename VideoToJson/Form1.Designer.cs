@@ -31,6 +31,7 @@ namespace VideoToJson
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.VideoProgressBar = new System.Windows.Forms.ProgressBar();
             this.SaveVideoButton = new System.Windows.Forms.Button();
             this.StartInfoLabel = new System.Windows.Forms.Label();
@@ -42,6 +43,7 @@ namespace VideoToJson
             this.LoadingVideoLabel = new System.Windows.Forms.Label();
             this.LabelControl1 = new System.Windows.Forms.Label();
             this.LabelControl2 = new System.Windows.Forms.Label();
+            this.videoTimer = new System.Windows.Forms.Timer(this.components);
             this.SuspendLayout();
             // 
             // VideoProgressBar
@@ -141,7 +143,6 @@ namespace VideoToJson
             this.LabelControl2.Name = "LabelControl2";
             this.LabelControl2.Size = new System.Drawing.Size(0, 16);
             this.LabelControl2.TabIndex = 10;
-            this.LabelControl2.Click += new System.EventHandler(this.LabelControl2_Click);
             // 
             // Form1
             // 
@@ -181,6 +182,7 @@ namespace VideoToJson
         private System.Windows.Forms.Label LoadingVideoLabel;
         private Label LabelControl1;
         private Label LabelControl2;
+        private Timer videoTimer;
     }
 }
 

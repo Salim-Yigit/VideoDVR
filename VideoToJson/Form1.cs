@@ -13,7 +13,6 @@ using System.Windows.Forms;
 using Newtonsoft.Json;
 using MongoDB.Driver;
 using MongoDB.Bson;
-using System.Drawing;
 using MongoDB.Bson.IO;
 
 namespace VideoToJson
@@ -127,49 +126,17 @@ namespace VideoToJson
         } 
 
         private void CreateVideo()
-        {   
-            DateTime getPrev,getNext;
-            DateTime now = DateTime.Now;
-
-            getPrev = now.AddSeconds(-prevTime);
-            getNext = now.AddSeconds(futureTime);
-
-            int indexStart = 900 - (this.prevTime*15);
-            int indexFinish = this.futureTime * 15;
-            int toplam = this.prevTime * 15 + this.futureTime * 15;
-            List<string> imagesPath = new List<string>(); 
-            string connectionString = "mongodb://localhost:27017"; // MongoDB sunucu bağlantı adresi
-
-            IMongoClient mongoClient = new MongoClient(connectionString);
-            IMongoDatabase database = mongoClient.GetDatabase("LiveVideo");
-            IMongoCollection<BsonDocument> collection = database.GetCollection<BsonDocument>("Frames");
-
-             
-
-            for (int i = indexStart;i<901;i++)
+        {
+            
+            while (futureTime > 0)
             {
-                var filter = new BsonDocument("Index", new BsonInt32(i));
-                var data = collection.Find(filter).ToList();
-                foreach (var j in data)
-                {
-                    string imagePath = j["FileNamePath"].AsString;
-                    imagesPath.Add(imagePath);
-                    
-                }
+                Thread.Sleep(1000);
+                ProgressBarFill();
+                futureTime--;
             }
 
-            for (int i = 1; i < indexFinish; i++)
-            {
-                var filter = new BsonDocument("Index", new BsonInt32(i));
-                var data = collection.Find(filter).ToList();
-                foreach (var j in data)
-                {
-                    string imagePath = j["FileNamePath"].AsString;
-                    imagesPath.Add(imagePath);
+            string imagesFolder1 = UpdateOutputDirectory(); 
 
-                }
-            }
-            string imagesFolder1 = UpdateOutputDirectory();
             using (Process ffmpegProcess = new Process())
             {
                 ffmpegProcess.StartInfo.FileName = "ffmpeg"; // FFmpeg'in yolunu belirtin
@@ -179,18 +146,20 @@ namespace VideoToJson
                 ffmpegProcess.StartInfo.RedirectStandardError = true;
                 ffmpegProcess.StartInfo.CreateNoWindow = true;
 
-                // FFmpeg komutunu oluşturun 
-                string imageFiles = string.Join(" ",imagesPath); // Resim dosyalarını birleştirin
-                string videoOutputFile = "C:\\Users\\yigit\\OneDrive\\Masaüstü\\ArtLabKatılımcılar.txt\\output.mp4";
+
+                string videoOutputFile = "C:\\Users\\yigit\\OneDrive\\Masaüstü\\output2.mp4";
                 string ffmpegCommand = $"-framerate 15 -i {imagesFolder1}//frame_%d.jpg -c:v libx264 -r 30 {videoOutputFile}";
                 ffmpegProcess.StartInfo.Arguments = ffmpegCommand;
 
-                ffmpegProcess.Start(); 
+                ffmpegProcess.Start();
                 Thread.Sleep(2000);
                 ffmpegProcess.Close();
             }
             PrintResult("Video Oluşturuldu");
+            
         }
+
+            
 
         private void PrintResult(string result)
         {
@@ -233,9 +202,9 @@ namespace VideoToJson
 
         private void SaveVideoButton_Click(object sender, EventArgs e)
         {
-            // SaveVideoButton'a tıklanınca LoadingVideoLabel ve LoadingVideoProcessBar görünür yapılır.
-            LoadingVideoLabel.Visible = true;
-            VideoProgressBar.Visible = true;
+            // SaveVideoButton'a tıklanınca LoadingVideoLabel ve LoadingVideoProcessBar görünür yapılır. 
+            this.videoTimer.Start();
+            ProgressBarFill();
             CreateVideo();
             // Resimleri videoya çevirecek kod lazım.
         }
@@ -251,12 +220,11 @@ namespace VideoToJson
                 this.prevTime = prevTime;
                 LabelControl1.Text = prevTime.ToString();
             }
-           
+            
         }
 
         private void FutureButton_Click(object sender, EventArgs e)
         {
-            
             string kullaniciVerisi = FutureInfoText.Text;
             int futureTime;
             if (int.TryParse(kullaniciVerisi, out futureTime))
@@ -264,11 +232,15 @@ namespace VideoToJson
                 this.futureTime = futureTime;
                 LabelControl2.Text = futureTime.ToString();
             }
-           
+            LoadingVideoLabel.Visible = true;
+            VideoProgressBar.Visible = true;
         }
-        private void LabelControl2_Click(object sender, EventArgs e)
-        {
 
+        private void ProgressBarFill()
+        {
+            int artis_miktari = 100 / this.futureTime;
+            this.VideoProgressBar.Increment(artis_miktari);
         }
+        
     }
 }
