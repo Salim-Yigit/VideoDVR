@@ -18,9 +18,7 @@ namespace VideoToJson
     {
         public static void ImagetoJson(string ImageFolder,int maxSize,int currentMinute)
         {
-            //string imageFolderPath = "C:\\Users\\yigit\\OneDrive\\Masaüstü\\yeni"; // Klasör yolunu ayarlayın
-
-            // MongoDB bağlantı bilgilerini ayarlayın
+            
             string connectionString = "mongodb://localhost:27017"; // MongoDB sunucu bağlantı adresi
             string databaseName = "LiveVideo";
             string collectionName = "Frames";
@@ -44,7 +42,7 @@ namespace VideoToJson
                 Thread.Sleep(15);
                 byte[] imageData = File.ReadAllBytes(fileNamePath);
 
-                // Encode the image data to base64
+                
                 string imageBase64 = Convert.ToBase64String(imageData);
 
                 DateTime timestamp = DateTime.Now;
@@ -52,13 +50,7 @@ namespace VideoToJson
 
                 if(currentMinute > 0)
                 {
-                    var filter = new BsonDocument("Index", new BsonInt32(i));
-                    var data = collection.Find(filter).ToList();
-                    foreach (var path in data)
-                    {
-                        File.Delete(path["FileNamePath"].AsString);
-                    }
-                    collection.DeleteOne(filter);
+                    deleteImages(collection, i); 
                 }
 
                 var imageDataObj = new
@@ -78,7 +70,17 @@ namespace VideoToJson
             }
             
         }
-
+        private static void deleteImages(IMongoCollection<BsonDocument> collection,int index)
+        {
+            var filter = new BsonDocument("Index", new BsonInt32(index));
+            var data = collection.Find(filter).ToList();
+            foreach (var path in data)
+            {
+                File.Delete(path["FileNamePath"].AsString);
+            }
+            collection.DeleteOne(filter);
+        }
+        
     }
     
 }

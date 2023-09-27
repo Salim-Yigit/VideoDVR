@@ -35,15 +35,18 @@ namespace VideoToJson
             this.VideoProgressBar = new System.Windows.Forms.ProgressBar();
             this.SaveVideoButton = new System.Windows.Forms.Button();
             this.StartInfoLabel = new System.Windows.Forms.Label();
-            this.FutureInfoLabel = new System.Windows.Forms.Label();
+            this.EndInfoLabel = new System.Windows.Forms.Label();
             this.PrevTimeText = new System.Windows.Forms.TextBox();
-            this.FutureInfoText = new System.Windows.Forms.TextBox();
+            this.EndInfoText = new System.Windows.Forms.TextBox();
             this.PrevTimeButton = new System.Windows.Forms.Button();
-            this.FutureInfoButton = new System.Windows.Forms.Button();
+            this.EndInfoButton = new System.Windows.Forms.Button();
             this.LoadingVideoLabel = new System.Windows.Forms.Label();
             this.LabelControl1 = new System.Windows.Forms.Label();
             this.LabelControl2 = new System.Windows.Forms.Label();
             this.videoTimer = new System.Windows.Forms.Timer(this.components);
+            this.FutureLabel = new System.Windows.Forms.Label();
+            this.FutureButton = new System.Windows.Forms.Button();
+            this.FutureText = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // VideoProgressBar
@@ -56,7 +59,7 @@ namespace VideoToJson
             // 
             // SaveVideoButton
             // 
-            this.SaveVideoButton.Location = new System.Drawing.Point(46, 287);
+            this.SaveVideoButton.Location = new System.Drawing.Point(46, 284);
             this.SaveVideoButton.Name = "SaveVideoButton";
             this.SaveVideoButton.Size = new System.Drawing.Size(129, 52);
             this.SaveVideoButton.TabIndex = 1;
@@ -69,20 +72,18 @@ namespace VideoToJson
             this.StartInfoLabel.AutoSize = true;
             this.StartInfoLabel.Location = new System.Drawing.Point(43, 45);
             this.StartInfoLabel.Name = "StartInfoLabel";
-            this.StartInfoLabel.Size = new System.Drawing.Size(440, 48);
+            this.StartInfoLabel.Size = new System.Drawing.Size(220, 32);
             this.StartInfoLabel.TabIndex = 2;
-            this.StartInfoLabel.Text = "Video kaydetme işlemini şu andan kaç saniye önce başlatmak istersiniz?\r\n(Saniye o" +
-    "larak giriniz.)\r\n\r\n";
+            this.StartInfoLabel.Text = "Videonun başlangıç saniyesini girin.\r\n\r\n";
             // 
-            // FutureInfoLabel
+            // EndInfoLabel
             // 
-            this.FutureInfoLabel.AutoSize = true;
-            this.FutureInfoLabel.Location = new System.Drawing.Point(43, 176);
-            this.FutureInfoLabel.Name = "FutureInfoLabel";
-            this.FutureInfoLabel.Size = new System.Drawing.Size(462, 32);
-            this.FutureInfoLabel.TabIndex = 3;
-            this.FutureInfoLabel.Text = "Video kaydetme işlemini şu andan kaç saniye sonra sonlandırmak istersiniz?\r\n(Sani" +
-    "ye olarak giriniz.)";
+            this.EndInfoLabel.AutoSize = true;
+            this.EndInfoLabel.Location = new System.Drawing.Point(43, 176);
+            this.EndInfoLabel.Name = "EndInfoLabel";
+            this.EndInfoLabel.Size = new System.Drawing.Size(185, 16);
+            this.EndInfoLabel.TabIndex = 3;
+            this.EndInfoLabel.Text = "Videonun bitiş saniyesini girin.";
             // 
             // PrevTimeText
             // 
@@ -91,12 +92,12 @@ namespace VideoToJson
             this.PrevTimeText.Size = new System.Drawing.Size(108, 22);
             this.PrevTimeText.TabIndex = 4;
             // 
-            // FutureInfoText
+            // EndInfoText
             // 
-            this.FutureInfoText.Location = new System.Drawing.Point(46, 223);
-            this.FutureInfoText.Name = "FutureInfoText";
-            this.FutureInfoText.Size = new System.Drawing.Size(108, 22);
-            this.FutureInfoText.TabIndex = 5;
+            this.EndInfoText.Location = new System.Drawing.Point(46, 223);
+            this.EndInfoText.Name = "EndInfoText";
+            this.EndInfoText.Size = new System.Drawing.Size(108, 22);
+            this.EndInfoText.TabIndex = 5;
             // 
             // PrevTimeButton
             // 
@@ -106,17 +107,17 @@ namespace VideoToJson
             this.PrevTimeButton.TabIndex = 6;
             this.PrevTimeButton.Text = "Zamanı \r\nKaydet\r\n";
             this.PrevTimeButton.UseVisualStyleBackColor = true;
-            this.PrevTimeButton.Click += new System.EventHandler(this.PrevButton_Click);
+            this.PrevTimeButton.Click += new System.EventHandler(this.StartButton_Click);
             // 
-            // FutureInfoButton
+            // EndInfoButton
             // 
-            this.FutureInfoButton.Location = new System.Drawing.Point(173, 223);
-            this.FutureInfoButton.Name = "FutureInfoButton";
-            this.FutureInfoButton.Size = new System.Drawing.Size(85, 43);
-            this.FutureInfoButton.TabIndex = 7;
-            this.FutureInfoButton.Text = "Zamanı \r\nKaydet";
-            this.FutureInfoButton.UseVisualStyleBackColor = true;
-            this.FutureInfoButton.Click += new System.EventHandler(this.FutureButton_Click);
+            this.EndInfoButton.Location = new System.Drawing.Point(173, 223);
+            this.EndInfoButton.Name = "EndInfoButton";
+            this.EndInfoButton.Size = new System.Drawing.Size(85, 43);
+            this.EndInfoButton.TabIndex = 7;
+            this.EndInfoButton.Text = "Zamanı \r\nKaydet";
+            this.EndInfoButton.UseVisualStyleBackColor = true;
+            this.EndInfoButton.Click += new System.EventHandler(this.EndButton_Click);
             // 
             // LoadingVideoLabel
             // 
@@ -144,19 +145,48 @@ namespace VideoToJson
             this.LabelControl2.Size = new System.Drawing.Size(0, 16);
             this.LabelControl2.TabIndex = 10;
             // 
+            // FutureLabel
+            // 
+            this.FutureLabel.AutoSize = true;
+            this.FutureLabel.Location = new System.Drawing.Point(439, 45);
+            this.FutureLabel.Name = "FutureLabel";
+            this.FutureLabel.Size = new System.Drawing.Size(266, 16);
+            this.FutureLabel.TabIndex = 11;
+            this.FutureLabel.Text = "Eğer isterseniz ileriki zaman için saniye girin";
+            // 
+            // FutureButton
+            // 
+            this.FutureButton.Location = new System.Drawing.Point(598, 89);
+            this.FutureButton.Name = "FutureButton";
+            this.FutureButton.Size = new System.Drawing.Size(107, 50);
+            this.FutureButton.TabIndex = 12;
+            this.FutureButton.Text = "Zamanı\r\n Kaydet";
+            this.FutureButton.UseVisualStyleBackColor = true;
+            this.FutureButton.Click += new System.EventHandler(this.FutureButton_Click);
+            // 
+            // FutureText
+            // 
+            this.FutureText.Location = new System.Drawing.Point(442, 87);
+            this.FutureText.Name = "FutureText";
+            this.FutureText.Size = new System.Drawing.Size(124, 22);
+            this.FutureText.TabIndex = 13;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.FutureText);
+            this.Controls.Add(this.FutureButton);
+            this.Controls.Add(this.FutureLabel);
             this.Controls.Add(this.LabelControl2);
             this.Controls.Add(this.LabelControl1);
             this.Controls.Add(this.LoadingVideoLabel);
-            this.Controls.Add(this.FutureInfoButton);
+            this.Controls.Add(this.EndInfoButton);
             this.Controls.Add(this.PrevTimeButton);
-            this.Controls.Add(this.FutureInfoText);
+            this.Controls.Add(this.EndInfoText);
             this.Controls.Add(this.PrevTimeText);
-            this.Controls.Add(this.FutureInfoLabel);
+            this.Controls.Add(this.EndInfoLabel);
             this.Controls.Add(this.StartInfoLabel);
             this.Controls.Add(this.SaveVideoButton);
             this.Controls.Add(this.VideoProgressBar);
@@ -174,15 +204,18 @@ namespace VideoToJson
         private System.Windows.Forms.ProgressBar VideoProgressBar;
         private System.Windows.Forms.Button SaveVideoButton;
         private System.Windows.Forms.Label StartInfoLabel;
-        private System.Windows.Forms.Label FutureInfoLabel;
+        private System.Windows.Forms.Label EndInfoLabel;
         private System.Windows.Forms.TextBox PrevTimeText;
-        private System.Windows.Forms.TextBox FutureInfoText;
+        private System.Windows.Forms.TextBox EndInfoText;
         private System.Windows.Forms.Button PrevTimeButton;
-        private System.Windows.Forms.Button FutureInfoButton;
+        private System.Windows.Forms.Button EndInfoButton;
         private System.Windows.Forms.Label LoadingVideoLabel;
         private Label LabelControl1;
         private Label LabelControl2;
         private Timer videoTimer;
+        private Label FutureLabel;
+        private Button FutureButton;
+        private TextBox FutureText;
     }
 }
 
