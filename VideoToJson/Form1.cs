@@ -98,7 +98,7 @@ namespace VideoToJson
                 {
                     process.StartInfo.FileName = "C:\\Users\\yigit\\OneDrive\\Masaüstü\\EskiHali\\VideoSaveToDatabase\\VideoToJson\\bin\\Debug\\ffmpeg.exe";
 
-                    process.StartInfo.Arguments = $"-i {rtspUrl} -vf fps=15 {outputDirectory}\\frame_%d.jpg";
+                    process.StartInfo.Arguments = $"-i {rtspUrl} -vf fps=30 {outputDirectory}\\frame_%d.jpg";
 
 
                     process.StartInfo.UseShellExecute = false;
@@ -114,7 +114,7 @@ namespace VideoToJson
 
                     }
                     watch.Start();
-                    JpegToJson.ImagetoJson(outputDirectory, 901,currentMinute);
+                    JpegToJson.ImagetoJson(outputDirectory, 1802,currentMinute);
                     PrintResult(watch.StopResult());
                     process.Kill();
                     process.Close();
@@ -127,7 +127,7 @@ namespace VideoToJson
 
         private void CreateVideo()
         {
-            
+
             while (futureTime > 0)
             {
                 Thread.Sleep(1000);
@@ -147,14 +147,15 @@ namespace VideoToJson
                 ffmpegProcess.StartInfo.CreateNoWindow = true;
 
 
-                string videoOutputFile = "C:\\Users\\yigit\\OneDrive\\Masaüstü\\output2.mp4";
-                string ffmpegCommand = $"-framerate 15 -i {imagesFolder1}//frame_%d.jpg -c:v libx264 -r 30 {videoOutputFile}";
+                string videoOutputFile = "C:\\Users\\yigit\\OneDrive\\Masaüstü\\output.mp4";
+                string ffmpegCommand = $"-framerate 30 -i {imagesFolder1}//frame_%d.jpg -c:v libx264 -r 30 {videoOutputFile}";
                 ffmpegProcess.StartInfo.Arguments = ffmpegCommand;
 
                 ffmpegProcess.Start();
-                Thread.Sleep(2000);
+                ffmpegProcess.WaitForExit(2000);
                 ffmpegProcess.Close();
-            }
+            } 
+            LoadingVideoLabel.Text = "Video Kayıt İşlemi Bitti.";
             PrintResult("Video Oluşturuldu");
             
         }
@@ -232,8 +233,9 @@ namespace VideoToJson
                 this.futureTime = futureTime;
                 LabelControl2.Text = futureTime.ToString();
             }
-            LoadingVideoLabel.Visible = true;
             VideoProgressBar.Visible = true;
+            LoadingVideoLabel.Visible = true;
+            LoadingVideoLabel.Text = "Video Kaydediliyor....";
         }
 
         private void ProgressBarFill()
