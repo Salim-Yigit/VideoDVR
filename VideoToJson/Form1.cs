@@ -113,7 +113,7 @@ namespace VideoToJson
 
                     }
                     watch.Start();
-                    JpegToJson.ImagetoJson(outputDirectory, 1802,currentMinute);
+                    JpegToJson.ImagetoJson(outputDirectory, 1801,currentMinute);
                     PrintResult(watch.StopResult());
                     process.Kill();
                     process.Close();
@@ -139,18 +139,44 @@ namespace VideoToJson
 
             int start = this.startTime * 30;
             int finish = this.endTime * 30;
+            int future = this.futureTime * 30;
+            int gecici = this.futureTime;
 
-            for(int i=start;i<finish;i++)
+            if (this.futureTime > 1)
             {
-                var filter = new BsonDocument("Index", new BsonInt32(i));
-                var data = collection.Find(filter).ToList();
-                foreach (var path in data)
+                while (gecici > 1)
                 {
-                    string tmp = path["FileNamePath"].AsString;
-                    imagesPaths.Add(tmp);
+                    Thread.Sleep(1000);
+                    ProgressBarFill();
+                    gecici--;
                 }
-                
+                for (int i = start; i < future; i++)
+                {
+                    var filter = new BsonDocument("Index", new BsonInt32(i));
+                    var data = collection.Find(filter).ToList();
+                    foreach (var path in data)
+                    {
+                        string tmp = path["FileNamePath"].AsString;
+                        imagesPaths.Add(tmp);
+                    }
+
+                }
+            }else
+            {   
+                for (int i = start; i < finish; i++)
+                {
+                    var filter = new BsonDocument("Index", new BsonInt32(i));
+                    var data = collection.Find(filter).ToList();
+                    foreach (var path in data)
+                    {
+                        string tmp = path["FileNamePath"].AsString;
+                        imagesPaths.Add(tmp);
+                    }
+
+                }
             }
+
+            
             return imagesPaths; 
         }
         private void CreateVideo()
@@ -165,15 +191,32 @@ namespace VideoToJson
 
             videoFileWriter.Open(outputFile, width, height,frameRate, VideoCodec.MPEG4);
 
-
-            foreach (string path in imagesPaths)
+            if(futureTime > 0)
             {
-                // Resmi yükleyin.
-                Image image = Image.FromFile(path);
-                videoFileWriter.WriteVideoFrame((Bitmap)image);
-            } 
-            videoFileWriter.Close();
-
+                foreach (string path in imagesPaths)
+                {
+                    // Resmi yükleyin.
+                    ProgressBarFill();
+                    Image image = Image.FromFile(path);
+                    videoFileWriter.WriteVideoFrame((Bitmap)image);
+                }
+                videoFileWriter.Close();
+                PrintResult("Video Kayıt İşlemi Bitti");
+                LoadingVideoLabel.Text = "Video Kayıt İşlemi Bitti.";
+            }else
+            {
+                foreach (string path in imagesPaths)
+                {
+                    // Resmi yükleyin.
+                    Image image = Image.FromFile(path);
+                    videoFileWriter.WriteVideoFrame((Bitmap)image);
+                    ProgressBarFill();
+                }
+                videoFileWriter.Close();
+                PrintResult("Video Kayıt İşlemi Bitti");
+                LoadingVideoLabel.Text = "Video Kayıt İşlemi Bitti.";
+            }
+            
         }
 
         private void PrintResult(string result)
@@ -251,7 +294,7 @@ namespace VideoToJson
 
         private void FutureButton_Click(object sender, EventArgs e)
         {
-            string kullaniciVerisi = EndInfoText.Text;
+            string kullaniciVerisi = FutureText.Text;
             int futureTime;
             if (int.TryParse(kullaniciVerisi, out futureTime))
             {
@@ -264,9 +307,17 @@ namespace VideoToJson
         }
 
         private void ProgressBarFill()
-        {
-            int artis_miktari = 100 / this.endTime;
-            this.VideoProgressBar.Increment(artis_miktari);
+        {   
+            if(this.futureTime > 0 )
+            {
+                int artisMiktari = 100 / (futureTime - startTime);
+                this.VideoProgressBar.Increment(artisMiktari);
+            }else
+            {
+                int artisMiktari = endTime - startTime;
+                this.VideoProgressBar.Increment(artisMiktari);
+            }
+            
         }
 
       
