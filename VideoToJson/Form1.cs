@@ -140,11 +140,11 @@ namespace VideoToJson
             int start = this.startTime * 30;
             int finish = this.endTime * 30;
             int future = this.futureTime * 30;
-            int gecici = this.futureTime;
+            int gecici = this.futureTime - this.startTime;
 
-            if (this.futureTime > 1)
+            if (this.futureTime > 0)
             {
-                while (gecici > 1)
+                while (gecici > 0)
                 {
                     Thread.Sleep(1000);
                     ProgressBarFill();
@@ -184,7 +184,7 @@ namespace VideoToJson
             List<string> imagesPaths = DecodeReturnImages();
             string outputFile = "C:\\Users\\yigit\\OneDrive\\Masaüstü\\video.mp4";
             int frameRate = 30;
-            int width = 1080;
+            int width = 1280;
             int height = 720;
 
             Accord.Video.FFMPEG.VideoFileWriter videoFileWriter = new Accord.Video.FFMPEG.VideoFileWriter();
@@ -196,7 +196,6 @@ namespace VideoToJson
                 foreach (string path in imagesPaths)
                 {
                     // Resmi yükleyin.
-                    ProgressBarFill();
                     Image image = Image.FromFile(path);
                     videoFileWriter.WriteVideoFrame((Bitmap)image);
                 }
