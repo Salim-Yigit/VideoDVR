@@ -125,7 +125,7 @@ namespace VideoToJson
         } 
 
 
-        private List<string> DecodeReturnImages()
+        private List<string> GetImages()
         {
             string connectionString = "mongodb://localhost:27017"; // MongoDB sunucu bağlantı adresi
             string databaseName = "LiveVideo";
@@ -141,15 +141,44 @@ namespace VideoToJson
             int finish = this.endTime * 30;
             int future = this.futureTime * 30;
             int gecici = this.futureTime - this.startTime;
-
+ 
             if (this.futureTime > 0)
-            {
+            {   
+                
                 while (gecici > 0)
                 {
                     Thread.Sleep(1000);
                     ProgressBarFill();
                     gecici--;
                 }
+                if (this.futureTime > 60)
+                {
+                    gecici = this.futureTime - this.startTime;
+                    gecici = gecici % 60;
+                    gecici = gecici * 30;
+                    for (int i = start; i < 1800; i++)
+                    {
+                        var filter = new BsonDocument("Index", new BsonInt32(i));
+                        var data = collection.Find(filter).ToList();
+                        foreach (var path in data)
+                        {
+                            string tmp = path["FileNamePath"].AsString;
+                            imagesPaths.Add(tmp);
+                        }
+
+                    }
+                    for(int i = 1; i <gecici;i++)
+                    {
+                        var filter = new BsonDocument("Index", new BsonInt32(i));
+                        var data = collection.Find(filter).ToList();
+                        foreach (var path in data)
+                        {
+                            string tmp = path["FileNamePath"].AsString;
+                            imagesPaths.Add(tmp);
+                        }
+                    }
+                } 
+
                 for (int i = start; i < future; i++)
                 {
                     var filter = new BsonDocument("Index", new BsonInt32(i));
@@ -175,13 +204,11 @@ namespace VideoToJson
 
                 }
             }
-
-            
             return imagesPaths; 
         }
         private void CreateVideo()
         {
-            List<string> imagesPaths = DecodeReturnImages();
+            List<string> imagesPaths = GetImages();
             string outputFile = "C:\\Users\\yigit\\OneDrive\\Masaüstü\\video.mp4";
             int frameRate = 30;
             int width = 1280;
@@ -198,6 +225,7 @@ namespace VideoToJson
                     // Resmi yükleyin.
                     Image image = Image.FromFile(path);
                     videoFileWriter.WriteVideoFrame((Bitmap)image);
+                    image.Dispose();
                 }
                 videoFileWriter.Close();
                 PrintResult("Video Kayıt İşlemi Bitti");
@@ -210,6 +238,7 @@ namespace VideoToJson
                     Image image = Image.FromFile(path);
                     videoFileWriter.WriteVideoFrame((Bitmap)image);
                     ProgressBarFill();
+                    image.Dispose();
                 }
                 videoFileWriter.Close();
                 PrintResult("Video Kayıt İşlemi Bitti");
